@@ -8,147 +8,252 @@
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; height:100%; background:#0e1621; color:#fff;
-    font-family:system-ui,-apple-system,sans-serif; overflow:hidden; }
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
   button { cursor:pointer; font-family:inherit; border:0; }
   input { font-family:inherit; }
 
-  .screen { display:none; flex-direction:column; height:100dvh; }
-  .screen.active { display:flex; }
+  .screen { display:none; flex-direction:column; height:100dvh;
+    opacity:0; transform:translateY(8px); transition:opacity .25s, transform .25s; }
+  .screen.active { display:flex; opacity:1; transform:translateY(0); }
 
-  /* LOGIN */
-  #login { align-items:center; justify-content:center; padding:24px; text-align:center; }
-  #login .logo { font-size:64px; margin-bottom:12px; }
-  #login h1 { margin:0 0 6px; font-size:26px; }
-  #login .sub { color:#7d8e9e; font-size:14px; margin-bottom:28px; }
-  #login .gbtn { display:flex; align-items:center; justify-content:center; gap:10px;
-    padding:14px 22px; background:#fff; color:#222; border-radius:12px;
-    font-size:15px; font-weight:600; width:100%; max-width:300px; }
-  #login .gbtn:disabled { opacity:.6; }
-  #login .gbtn svg { width:20px; height:20px; }
-  #loginMsg { color:#e74c3c; font-size:13px; margin-top:14px; max-width:300px; min-height:18px; }
+  /* ========== LOGIN ========== */
+  #login { align-items:center; justify-content:flex-start; padding:30px 24px; text-align:center; overflow-y:auto; }
+  #login .logo { width:84px; height:84px; border-radius:50%;
+    background:linear-gradient(135deg,#5288c1,#2b5278);
+    display:flex; align-items:center; justify-content:center;
+    margin:20px auto 14px; animation:pop .5s cubic-bezier(.2,1.3,.4,1); }
+  #login .logo svg { width:44px; height:44px; }
+  @keyframes pop { 0%{transform:scale(.5);opacity:0} 100%{transform:scale(1);opacity:1} }
 
-  /* HEADER */
-  header { background:#17212b; padding:14px 16px; display:flex; align-items:center;
-    gap:10px; border-bottom:1px solid #0e1621; flex-shrink:0; min-height:56px; }
-  header h2 { font-size:18px; margin:0; flex:1; font-weight:600; }
-  header .icon-btn { background:transparent; color:#7fa9d1; padding:8px;
-    font-size:20px; line-height:1; border-radius:50%; }
-  header .icon-btn:active { background:#232e3c; }
-  header .back { color:#7fa9d1; font-size:26px; padding:6px 10px 6px 0; line-height:1; }
+  #login h1 { margin:0 0 4px; font-size:26px; animation:fadeUp .4s .1s backwards; }
+  #login .sub { color:#7d8e9e; font-size:13px; margin-bottom:24px; animation:fadeUp .4s .15s backwards; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
-  /* CONTENT */
-  .content { flex:1; overflow-y:auto; }
+  #login .box { width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; animation:fadeUp .4s .2s backwards; }
+
+  .gbtn { display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:13px; background:#fff; color:#222; border-radius:12px;
+    font-size:15px; font-weight:600; transition:transform .1s, box-shadow .2s; }
+  .gbtn:active { transform:scale(.97); }
+  .gbtn:disabled { opacity:.6; }
+  .gbtn svg { width:20px; height:20px; flex-shrink:0; }
+
+  .divider { display:flex; align-items:center; gap:10px; color:#5c6b7a;
+    font-size:12px; margin:6px 0; }
+  .divider::before, .divider::after { content:""; flex:1; height:1px; background:#22303d; }
+
+  .switch { display:flex; background:#17212b; border-radius:11px; padding:4px; }
+  .switch button { flex:1; padding:10px; border-radius:8px; background:transparent;
+    color:#7d8e9e; font-size:14px; font-weight:600; transition:.2s; }
+  .switch button.active { background:#2b5278; color:#fff; }
+
+  .auth-form { display:flex; flex-direction:column; gap:10px; }
+  .auth-form input { padding:13px 15px; border-radius:11px; border:1px solid #22303d;
+    background:#17212b; color:#fff; font-size:15px; outline:none; transition:.15s; }
+  .auth-form input:focus { border-color:#5288c1; background:#1a2632;
+    box-shadow:0 0 0 3px rgba(82,136,193,.15); }
+  .auth-form .primary { padding:14px; border-radius:11px; background:#5288c1;
+    color:#fff; font-size:15px; font-weight:600; margin-top:4px;
+    transition:transform .1s, background .15s; }
+  .auth-form .primary:active { transform:scale(.98); background:#4478b0; }
+  .auth-form .primary:disabled { opacity:.6; }
+
+  .link { color:#7fa9d1; font-size:13px; text-decoration:none;
+    background:transparent; padding:6px; }
+  .link:active { opacity:.7; }
+
+  #loginMsg { font-size:13px; line-height:1.5; min-height:18px;
+    text-align:center; max-width:340px; word-wrap:break-word; padding:0 4px;
+    animation:fadeUp .25s; }
+  #loginMsg.err { color:#e74c3c; }
+  #loginMsg.ok { color:#4caf50; }
+
+  /* ========== HEADER ========== */
+  header { background:#17212b; padding:12px 12px; display:flex; align-items:center;
+    gap:8px; border-bottom:1px solid #0e1621; flex-shrink:0; min-height:56px; }
+  header h2 { font-size:18px; margin:0; flex:1; font-weight:600;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  header .icon-btn { background:transparent; color:#7fa9d1; padding:9px;
+    line-height:1; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; transition:background .15s, transform .1s; }
+  header .icon-btn:active { background:#232e3c; transform:scale(.92); }
+  header .icon-btn svg { width:22px; height:22px; }
+
+  /* ========== CONTENT ========== */
+  .content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   .tab { display:none; height:100%; overflow-y:auto; }
-  .tab.active { display:block; }
+  .tab.active { display:block; animation:fadeUp .25s; }
 
   .item { padding:12px 16px; display:flex; align-items:center; gap:14px;
-    border-bottom:1px solid #17212b; cursor:pointer; }
+    border-bottom:1px solid #17212b; cursor:pointer; transition:background .15s; }
   .item:active { background:#17212b; }
   .item .avatar { width:52px; height:52px; border-radius:50%; background:#2b5278;
     display:flex; align-items:center; justify-content:center; font-size:22px;
-    flex-shrink:0; overflow:hidden; }
+    flex-shrink:0; overflow:hidden; font-weight:600; }
   .item .avatar img { width:100%; height:100%; object-fit:cover; }
   .item .info { flex:1; min-width:0; }
-  .item .name { font-weight:600; font-size:15px; margin-bottom:3px; overflow:hidden;
-    text-overflow:ellipsis; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+  .item .name { font-weight:600; font-size:15px; margin-bottom:3px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    display:flex; align-items:center; gap:6px; }
   .item .sub { font-size:13px; color:#7d8e9e; overflow:hidden;
     text-overflow:ellipsis; white-space:nowrap; }
-  .item .meta { font-size:12px; color:#7d8e9e; align-self:flex-start; flex-shrink:0; }
-  .dot { width:8px; height:8px; border-radius:50%; background:#4caf50; display:inline-block; }
+  .item .meta { font-size:12px; color:#7d8e9e; align-self:flex-start;
+    flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:#4caf50;
+    display:inline-block; box-shadow:0 0 0 3px rgba(76,175,80,.2); }
+  .item:active .avatar { transform:scale(.95); }
+  .item .avatar { transition:transform .15s; }
 
-  .empty { padding:60px 24px; text-align:center; color:#7d8e9e; font-size:14px; line-height:1.6; }
-  .empty .big { font-size:48px; margin-bottom:12px; opacity:.5; }
+  .empty { padding:70px 24px; text-align:center; color:#7d8e9e;
+    font-size:14px; line-height:1.6; animation:fadeUp .3s; }
+  .empty .big { font-size:52px; margin-bottom:14px; opacity:.4; }
 
-  /* BOTTOM NAV */
+  /* ========== BOTTOM NAV ========== */
   .bottom-nav { display:flex; background:#17212b; border-top:1px solid #0e1621;
-    flex-shrink:0; padding:6px 0 env(safe-area-inset-bottom, 6px) 0; }
+    flex-shrink:0; padding:4px 0 env(safe-area-inset-bottom, 4px) 0; }
   .bottom-nav button { flex:1; background:transparent; color:#7d8e9e;
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    padding:8px 4px; font-size:11px; font-weight:500; }
-  .bottom-nav button .ico { font-size:22px; line-height:1; }
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:8px 4px; font-size:11px; font-weight:500;
+    transition:color .2s, transform .15s; position:relative; }
+  .bottom-nav button svg { width:24px; height:24px; transition:transform .2s; }
   .bottom-nav button.active { color:#5288c1; }
+  .bottom-nav button.active svg { transform:scale(1.1); }
+  .bottom-nav button:active svg { transform:scale(.9); }
 
-  /* CHAT */
+  /* ========== CHAT ========== */
   #messages { flex:1; overflow-y:auto; padding:12px; display:flex;
-    flex-direction:column; gap:6px; }
+    flex-direction:column; gap:6px; -webkit-overflow-scrolling:touch; }
   .msg { max-width:80%; padding:9px 13px; border-radius:14px; background:#182533;
-    word-wrap:break-word; font-size:15px; line-height:1.35; }
+    word-wrap:break-word; font-size:15px; line-height:1.35;
+    animation:msgIn .25s cubic-bezier(.2,1,.4,1); }
+  @keyframes msgIn { from{opacity:0;transform:translateY(8px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
   .msg.mine { align-self:flex-end; background:#2b5278; }
   .msg .author { font-size:12px; color:#5288c1; margin-bottom:3px; font-weight:600; }
   .msg .time { font-size:11px; color:#7d8e9e; text-align:right; margin-top:2px; }
   .msg.mine .time { color:#a9c8e2; }
+
   form.composer { display:flex; gap:8px; padding:10px 12px; background:#17212b;
-    border-top:1px solid #0e1621; flex-shrink:0;
+    border-top:1px solid #0e1621; flex-shrink:0; align-items:flex-end;
     padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px)); }
   form.composer input { flex:1; padding:13px 16px; border-radius:22px;
-    background:#232e3c; color:#fff; font-size:15px; outline:none; border:0; }
+    background:#232e3c; color:#fff; font-size:15px; outline:none; border:0;
+    transition:background .15s; }
+  form.composer input:focus { background:#26323f; }
   form.composer button { width:46px; height:46px; border-radius:50%;
-    background:#5288c1; color:#fff; font-size:18px; flex-shrink:0; }
+    background:#5288c1; color:#fff; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .1s, background .15s; }
+  form.composer button:active { transform:scale(.9); background:#4478b0; }
+  form.composer button svg { width:22px; height:22px; }
 
-  /* SETTINGS */
-  .settings-block { background:#17212b; margin:10px 0; }
+  /* ========== SETTINGS ========== */
+  .settings-block { background:#17212b; margin:10px 0;
+    animation:fadeUp .3s backwards; }
   .profile { padding:24px 16px; display:flex; flex-direction:column;
     align-items:center; gap:10px; }
-  .profile .avatar { width:88px; height:88px; border-radius:50%; background:#2b5278;
-    display:flex; align-items:center; justify-content:center; font-size:36px; overflow:hidden; }
+  .profile .avatar { width:92px; height:92px; border-radius:50%;
+    background:#2b5278; display:flex; align-items:center;
+    justify-content:center; font-size:38px; overflow:hidden; font-weight:600;
+    transition:transform .2s; }
+  .profile .avatar:active { transform:scale(.95); }
   .profile .avatar img { width:100%; height:100%; object-fit:cover; }
   .profile .pname { font-size:20px; font-weight:600; }
   .profile .pemail { font-size:13px; color:#7d8e9e; }
   .srow { padding:16px; display:flex; align-items:center; gap:14px;
-    border-top:1px solid #0e1621; cursor:pointer; }
+    border-top:1px solid #0e1621; cursor:pointer; transition:background .15s; }
   .srow:active { background:#1e2a38; }
-  .srow .ico { font-size:20px; width:24px; text-align:center; color:#7fa9d1; }
+  .srow .ico { color:#7fa9d1; display:flex; align-items:center;
+    justify-content:center; width:24px; }
+  .srow .ico svg { width:20px; height:20px; }
   .srow .label { flex:1; font-size:15px; }
   .srow.danger .ico, .srow.danger .label { color:#e74c3c; }
 
-  /* MODAL */
+  /* ========== MODAL ========== */
   .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75);
-    z-index:100; align-items:center; justify-content:center; padding:20px; }
-  .modal.active { display:flex; }
+    z-index:100; align-items:center; justify-content:center; padding:20px;
+    opacity:0; transition:opacity .2s; }
+  .modal.active { display:flex; opacity:1; }
   .modal-box { background:#17212b; padding:20px; border-radius:16px;
-    width:100%; max-width:360px; max-height:80vh; overflow-y:auto; }
+    width:100%; max-width:360px; max-height:80vh; overflow-y:auto;
+    transform:translateY(20px); transition:transform .25s cubic-bezier(.2,1,.4,1); }
+  .modal.active .modal-box { transform:translateY(0); }
   .modal-box h3 { margin:0 0 14px; font-size:18px; }
   .modal-box input { width:100%; padding:12px; border-radius:10px;
     border:1px solid #2b3a4a; background:#232e3c; color:#fff;
-    font-size:15px; outline:none; margin-bottom:10px; }
+    font-size:15px; outline:none; margin-bottom:10px; transition:.15s; }
+  .modal-box input:focus { border-color:#5288c1; }
   .m-actions { display:flex; gap:8px; margin-top:8px; }
   .m-actions button { flex:1; padding:12px; border-radius:10px;
-    font-size:15px; font-weight:600; }
+    font-size:15px; font-weight:600; transition:transform .1s; }
+  .m-actions button:active { transform:scale(.97); }
   .btn-primary { background:#5288c1; color:#fff; }
   .btn-secondary { background:#232e3c; color:#fff; }
   .user-pick { padding:10px 12px; display:flex; align-items:center;
-    gap:12px; border-radius:8px; cursor:pointer; }
+    gap:12px; border-radius:8px; cursor:pointer; transition:background .15s; }
   .user-pick.selected { background:#2b5278; }
-  .user-pick .avatar { width:40px; height:40px; border-radius:50%; background:#2b5278;
-    display:flex; align-items:center; justify-content:center; font-size:16px;
-    overflow:hidden; flex-shrink:0; }
+  .user-pick .avatar { width:40px; height:40px; border-radius:50%;
+    background:#2b5278; display:flex; align-items:center;
+    justify-content:center; font-size:16px; overflow:hidden;
+    flex-shrink:0; font-weight:600; }
   .user-pick .avatar img { width:100%; height:100%; object-fit:cover; }
   .user-pick .nm { flex:1; font-size:14px; }
   .user-pick .chk { width:22px; height:22px; border-radius:50%;
     border:2px solid #5288c1; display:flex; align-items:center;
-    justify-content:center; font-size:14px; color:transparent; }
+    justify-content:center; font-size:14px; color:transparent;
+    transition:background .15s, color .15s; }
   .user-pick.selected .chk { background:#5288c1; color:#fff; }
+
+  /* Toast */
+  .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:#2b5278; color:#fff; padding:11px 18px; border-radius:22px;
+    font-size:14px; opacity:0; transition:.3s; z-index:200; pointer-events:none;
+    max-width:80%; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,.4); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 <div id="login" class="screen active">
-  <div class="logo">💬</div>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="#fff"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+  </div>
   <h1>MyChat</h1>
   <div class="sub">Общайся со всем миром</div>
-  <button class="gbtn" id="googleBtn">
-    <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 2.9-2.2 5.4-4.6 7.1l7.2 5.6C43.4 37.5 46.5 31.5 46.5 24.5z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.4-.7-2.9-.7-4.6s.3-3.2.7-4.6l-7.8-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.2-2 15-5.5l-7.2-5.6c-2 1.4-4.6 2.2-7.8 2.2-6.3 0-11.7-3.7-13.6-9.8l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
-    Войти через Google
-  </button>
-  <div id="loginMsg"></div>
+
+  <div class="box">
+    <button class="gbtn" id="googleBtn">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 2.9-2.2 5.4-4.6 7.1l7.2 5.6C43.4 37.5 46.5 31.5 46.5 24.5z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.4-.7-2.9-.7-4.6s.3-3.2.7-4.6l-7.8-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.2-2 15-5.5l-7.2-5.6c-2 1.4-4.6 2.2-7.8 2.2-6.3 0-11.7-3.7-13.6-9.8l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+      Войти через Google
+    </button>
+
+    <div class="divider">или</div>
+
+    <div class="switch">
+      <button id="tabLogin" class="active">Вход</button>
+      <button id="tabReg">Регистрация</button>
+    </div>
+
+    <form class="auth-form" id="authForm">
+      <input id="authName" type="text" placeholder="Твоё имя" maxlength="30" style="display:none;">
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="authPass" type="password" placeholder="Пароль (мин. 6 символов)" autocomplete="current-password">
+      <button type="submit" class="primary" id="authSubmit">Войти</button>
+    </form>
+
+    <button class="link" id="forgotBtn" style="display:none">Забыл пароль?</button>
+
+    <div id="loginMsg"></div>
+  </div>
 </div>
 
-<!-- MAIN -->
+<!-- ================= MAIN ================= -->
 <div id="mainScreen" class="screen">
   <header>
     <h2 id="headerTitle">MyChat</h2>
-    <button class="icon-btn" id="newChatBtn">✏️</button>
+    <button class="icon-btn" id="newChatBtn" title="Новый чат">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </button>
   </header>
   <div class="content">
     <div id="chatsTab" class="tab active"><div id="chatsList"></div></div>
@@ -162,34 +267,63 @@
         </div>
       </div>
       <div class="settings-block">
+        <div class="srow" id="rowEditName">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+          <div class="label">Изменить имя</div>
+        </div>
+        <div class="srow" id="rowChangePass">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="label">Сменить пароль</div>
+        </div>
+        <div class="srow" id="rowAbout">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+          <div class="label">О приложении</div>
+          <div class="meta">v3.0</div>
+        </div>
+      </div>
+      <div class="settings-block">
         <div class="srow danger" id="rowLogout">
-          <div class="ico">🚪</div><div class="label">Выйти из аккаунта</div>
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+          <div class="label">Выйти из аккаунта</div>
         </div>
       </div>
     </div>
   </div>
   <nav class="bottom-nav">
-    <button data-tab="chatsTab" class="active"><span class="ico">💬</span><span>Чаты</span></button>
-    <button data-tab="peopleTab"><span class="ico">👥</span><span>Люди</span></button>
-    <button data-tab="settingsTab"><span class="ico">⚙️</span><span>Настройки</span></button>
+    <button data-tab="chatsTab" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Чаты</span>
+    </button>
+    <button data-tab="peopleTab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Люди</span>
+    </button>
+    <button data-tab="settingsTab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Настройки</span>
+    </button>
   </nav>
 </div>
 
-<!-- CHAT -->
+<!-- ================= CHAT ================= -->
 <div id="chatScreen" class="screen">
   <header>
-    <button class="back" id="backBtn">←</button>
-    <div id="chatAvatar" style="width:36px;height:36px;border-radius:50%;background:#2b5278;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;"></div>
+    <button class="icon-btn" id="backBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div id="chatAvatar" style="width:38px;height:38px;border-radius:50%;background:#2b5278;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;font-weight:600;flex-shrink:0;"></div>
     <h2 id="chatTitle" style="font-size:16px;">…</h2>
   </header>
   <div id="messages"></div>
   <form class="composer" id="form">
     <input id="input" placeholder="Сообщение…" autocomplete="off" maxlength="500">
-    <button type="submit">➤</button>
+    <button type="submit">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
   </form>
 </div>
 
-<!-- NEW CHAT MODAL -->
+<!-- ================= MODALS ================= -->
 <div class="modal" id="newChatModal">
   <div class="modal-box">
     <h3>Новый чат</h3>
@@ -203,9 +337,51 @@
   </div>
 </div>
 
+<div class="modal" id="editNameModal">
+  <div class="modal-box">
+    <h3>Изменить имя</h3>
+    <input id="editNameInput" placeholder="Твоё имя" maxlength="40">
+    <div class="m-actions">
+      <button class="btn-secondary" id="cancelEditName">Отмена</button>
+      <button class="btn-primary" id="saveEditName">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="resetModal">
+  <div class="modal-box">
+    <h3>Сброс пароля</h3>
+    <p style="color:#7d8e9e;font-size:13px;margin:0 0 12px;">
+      Введи email — мы отправим ссылку для восстановления пароля.
+    </p>
+    <input id="resetEmail" type="email" placeholder="Email">
+    <div class="m-actions">
+      <button class="btn-secondary" id="cancelReset">Отмена</button>
+      <button class="btn-primary" id="sendReset">Отправить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="changePassModal">
+  <div class="modal-box">
+    <h3>Сменить пароль</h3>
+    <input id="curPass" type="password" placeholder="Текущий пароль">
+    <input id="newPass" type="password" placeholder="Новый пароль (мин. 6)">
+    <div class="m-actions">
+      <button class="btn-secondary" id="cancelChangePass">Отмена</button>
+      <button class="btn-primary" id="saveChangePass">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendPasswordResetEmail, updatePassword, EmailAuthProvider,
+  reauthenticateWithCredential, updateProfile,
   browserLocalPersistence, setPersistence }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, push, set, get, update, onValue, onChildAdded,
@@ -231,11 +407,24 @@ setPersistence(auth, browserLocalPersistence).catch(e => console.error(e));
 
 const $ = id => document.getElementById(id);
 let me = null, myProfile = null, allUsers = {}, myChats = [],
-    currentChat = null, msgUnsub = null, pickerSelected = {};
+    currentChat = null, msgUnsub = null, pickerSelected = {}, mode = 'login';
 
-// === GOOGLE LOGIN ===
+function toast(text) {
+  const t = $('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function setMsg(text, type = '') {
+  const el = $('loginMsg');
+  el.textContent = text;
+  el.className = type;
+}
+
+// ==================== GOOGLE ====================
 $('googleBtn').onclick = async () => {
-  $('loginMsg').textContent = '';
+  setMsg('');
   $('googleBtn').disabled = true;
   const orig = $('googleBtn').innerHTML;
   $('googleBtn').innerHTML = 'Подключение…';
@@ -245,11 +434,111 @@ $('googleBtn').onclick = async () => {
     console.error(e);
     $('googleBtn').disabled = false;
     $('googleBtn').innerHTML = orig;
-    $('loginMsg').textContent = 'Ошибка: ' + (e.code || e.message);
+    setMsg('Ошибка: ' + (e.code || e.message), 'err');
   }
 };
 
-// === AUTH STATE ===
+// ==================== EMAIL/PASS ====================
+$('tabLogin').onclick = () => switchMode('login');
+$('tabReg').onclick = () => switchMode('reg');
+
+function switchMode(m) {
+  mode = m;
+  setMsg('');
+  $('tabLogin').classList.toggle('active', m === 'login');
+  $('tabReg').classList.toggle('active', m === 'reg');
+  $('authName').style.display = m === 'reg' ? 'block' : 'none';
+  $('authSubmit').textContent = m === 'reg' ? 'Создать аккаунт' : 'Войти';
+  $('authPass').autocomplete = m === 'reg' ? 'new-password' : 'current-password';
+  $('forgotBtn').style.display = m === 'login' ? 'block' : 'none';
+}
+
+$('authForm').onsubmit = async e => {
+  e.preventDefault();
+  setMsg('');
+  const email = $('authEmail').value.trim();
+  const pass = $('authPass').value;
+  const name = $('authName').value.trim();
+  if (!email || !pass) { setMsg('Заполни email и пароль', 'err'); return; }
+  if (pass.length < 6) { setMsg('Пароль минимум 6 символов', 'err'); return; }
+  if (mode === 'reg' && !name) { setMsg('Введи имя', 'err'); return; }
+
+  $('authSubmit').disabled = true;
+  $('authSubmit').textContent = 'Подключение…';
+  try {
+    if (mode === 'reg') {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name });
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
+    }
+  } catch (e) {
+    console.error(e);
+    $('authSubmit').disabled = false;
+    $('authSubmit').textContent = mode === 'reg' ? 'Создать аккаунт' : 'Войти';
+    const map = {
+      'auth/email-already-in-use': 'Этот email уже занят',
+      'auth/invalid-email': 'Неверный email',
+      'auth/weak-password': 'Слабый пароль (мин. 6)',
+      'auth/user-not-found': 'Пользователь не найден',
+      'auth/wrong-password': 'Неверный пароль',
+      'auth/invalid-credential': 'Неверный email или пароль',
+      'auth/too-many-requests': 'Слишком много попыток. Подожди.'
+    };
+    setMsg(map[e.code] || ('Ошибка: ' + e.code), 'err');
+  }
+};
+
+// ==================== PASSWORD RESET ====================
+$('forgotBtn').onclick = () => {
+  $('resetEmail').value = $('authEmail').value.trim();
+  $('resetModal').classList.add('active');
+};
+$('cancelReset').onclick = () => $('resetModal').classList.remove('active');
+$('resetModal').onclick = e => { if (e.target.id === 'resetModal') $('resetModal').classList.remove('active'); };
+$('sendReset').onclick = async () => {
+  const email = $('resetEmail').value.trim();
+  if (!email) { toast('Введи email'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    $('resetModal').classList.remove('active');
+    toast('✅ Письмо отправлено на ' + email);
+  } catch (e) {
+    toast('Ошибка: ' + e.code);
+  }
+};
+
+// ==================== CHANGE PASSWORD ====================
+$('rowChangePass').onclick = () => {
+  $('curPass').value = '';
+  $('newPass').value = '';
+  $('changePassModal').classList.add('active');
+};
+$('cancelChangePass').onclick = () => $('changePassModal').classList.remove('active');
+$('changePassModal').onclick = e => { if (e.target.id === 'changePassModal') $('changePassModal').classList.remove('active'); };
+$('saveChangePass').onclick = async () => {
+  const cur = $('curPass').value;
+  const nw = $('newPass').value;
+  if (!cur || !nw) { toast('Заполни оба поля'); return; }
+  if (nw.length < 6) { toast('Новый пароль мин. 6'); return; }
+  try {
+    // Google-аккаунты не имеют пароля — но на всякий случай пробуем
+    if (me.providerData[0]?.providerId === 'google.com') {
+      toast('Ты вошёл через Google — пароля нет');
+      $('changePassModal').classList.remove('active');
+      return;
+    }
+    const cred = EmailAuthProvider.credential(me.email, cur);
+    await reauthenticateWithCredential(me, cred);
+    await updatePassword(me, nw);
+    $('changePassModal').classList.remove('active');
+    toast('✅ Пароль изменён');
+  } catch (e) {
+    toast('Ошибка: ' + (e.code || e.message));
+  }
+};
+
+// ==================== AUTH STATE ====================
 onAuthStateChanged(auth, async user => {
   if (!user) {
     me = null; myProfile = null;
@@ -258,10 +547,11 @@ onAuthStateChanged(auth, async user => {
       if (s.id !== 'login') s.classList.remove('active');
     });
     $('googleBtn').disabled = false;
+    $('authSubmit').disabled = false;
     return;
   }
   me = user;
-  $('loginMsg').textContent = '';
+  setMsg('');
 
   try {
     const userRef = ref(db, `users/${user.uid}`);
@@ -279,7 +569,7 @@ onAuthStateChanged(auth, async user => {
     onDisconnect(oRef).set(false);
   } catch (e) {
     console.error('Save error:', e);
-    $('loginMsg').textContent = 'Ошибка сохранения: ' + e.message;
+    setMsg('Ошибка сохранения: ' + e.message, 'err');
     return;
   }
 
@@ -290,7 +580,7 @@ onAuthStateChanged(auth, async user => {
   watchChats();
 });
 
-// === USERS ===
+// ==================== USERS ====================
 function watchUsers() {
   onValue(ref(db, 'users'), snap => {
     allUsers = snap.val() || {};
@@ -321,7 +611,7 @@ function renderPeople() {
   });
 }
 
-// === CHATS ===
+// ==================== CHATS ====================
 function watchChats() {
   onValue(ref(db, 'chats'), snap => {
     const all = snap.val() || {};
@@ -336,7 +626,7 @@ function watchChats() {
 function renderChats() {
   const list = $('chatsList');
   if (!myChats.length) {
-    list.innerHTML = `<div class="empty"><div class="big">💬</div>Пока нет чатов.<br>Нажми ✏️ сверху или открой «Люди».</div>`;
+    list.innerHTML = `<div class="empty"><div class="big">💬</div>Пока нет чатов.<br>Нажми ✏️ или открой «Люди».</div>`;
     return;
   }
   list.innerHTML = '';
@@ -425,7 +715,7 @@ $('form').onsubmit = async e => {
       lastUid: me.uid, lastTime: Date.now() });
 };
 
-// === TABS ===
+// ==================== TABS ====================
 document.querySelectorAll('.bottom-nav button').forEach(b => {
   b.onclick = () => switchTab(b.dataset.tab);
 });
@@ -437,7 +727,7 @@ function switchTab(id) {
   $('headerTitle').textContent = titles[id] || 'MyChat';
 }
 
-// === NEW CHAT ===
+// ==================== NEW CHAT ====================
 $('newChatBtn').onclick = () => {
   pickerSelected = {};
   $('newRoomName').value = '';
@@ -474,7 +764,7 @@ function renderPicker() {
 $('createChat').onclick = async () => {
   const sel = Object.keys(pickerSelected).filter(u => pickerSelected[u]);
   const name = $('newRoomName').value.trim();
-  if (!sel.length) { alert('Выбери хотя бы одного'); return; }
+  if (!sel.length) { toast('Выбери хотя бы одного'); return; }
   if (sel.length === 1 && !name) {
     $('newChatModal').classList.remove('active');
     openPrivate(sel[0]);
@@ -490,7 +780,7 @@ $('createChat').onclick = async () => {
   switchTab('chatsTab');
 };
 
-// === SETTINGS ===
+// ==================== SETTINGS ====================
 function renderSettings() {
   $('setName').textContent = myProfile.name;
   $('setEmail').textContent = myProfile.email;
@@ -499,11 +789,36 @@ function renderSettings() {
     ? `<img src="${esc(myProfile.photo)}" style="width:100%;height:100%;object-fit:cover;">`
     : esc((myProfile.name || '?')[0].toUpperCase());
 }
+
+$('rowEditName').onclick = () => {
+  $('editNameInput').value = myProfile.name;
+  $('editNameModal').classList.add('active');
+  setTimeout(() => $('editNameInput').focus(), 150);
+};
+$('cancelEditName').onclick = () => $('editNameModal').classList.remove('active');
+$('editNameModal').onclick = e => {
+  if (e.target.id === 'editNameModal') $('editNameModal').classList.remove('active');
+};
+$('saveEditName').onclick = async () => {
+  const n = $('editNameInput').value.trim();
+  if (!n) return;
+  myProfile.name = n;
+  await update(ref(db, `users/${me.uid}`), { name: n });
+  try { await updateProfile(me, { displayName: n }); } catch(e){}
+  renderSettings();
+  $('editNameModal').classList.remove('active');
+  toast('✅ Имя изменено');
+};
+
+$('rowAbout').onclick = () => {
+  toast('MyChat v3.0 — мессенджер на Firebase');
+};
+
 $('rowLogout').onclick = () => {
   if (confirm('Выйти из аккаунта?')) signOut(auth);
 };
 
-// === HELPERS ===
+// ==================== HELPERS ====================
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

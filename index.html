@@ -4,140 +4,147 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MyChat</title>
-<meta name="theme-color" content="#101821">
+<meta name="theme-color" content="#0e1621">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin:0; height:100%; background:#0e1621; color:#fff; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
+  html, body { margin:0; height:100%; background:#0e1621; color:#fff;
+    font-family:system-ui,-apple-system,sans-serif; overflow:hidden; }
   button { cursor:pointer; font-family:inherit; border:0; }
   input { font-family:inherit; }
+
   .screen { display:none; flex-direction:column; height:100dvh; }
   .screen.active { display:flex; }
 
-  #login { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100dvh; padding:24px; background:#0e1621; overflow-y:auto; }
-  #login .logo { width:76px; height:76px; border-radius:50%; background:linear-gradient(135deg,#5288c1,#2b5278); display:flex; align-items:center; justify-content:center; font-size:38px; margin-bottom:14px; }
-  #login h1 { margin:0 0 4px; font-size:26px; }
-  #login .sub { color:#7d8e9e; font-size:13px; margin-bottom:22px; }
-  #login .box { width:100%; max-width:340px; display:flex; flex-direction:column; gap:12px; }
+  /* LOGIN */
+  #login { align-items:center; justify-content:center; padding:24px; text-align:center; }
+  #login .logo { font-size:64px; margin-bottom:12px; }
+  #login h1 { margin:0 0 6px; font-size:26px; }
+  #login .sub { color:#7d8e9e; font-size:14px; margin-bottom:28px; }
+  #login .gbtn { display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:14px 22px; background:#fff; color:#222; border-radius:12px;
+    font-size:15px; font-weight:600; width:100%; max-width:300px; }
+  #login .gbtn:disabled { opacity:.6; }
+  #login .gbtn svg { width:20px; height:20px; }
+  #loginMsg { color:#e74c3c; font-size:13px; margin-top:14px; max-width:300px; min-height:18px; }
 
-  .gbtn { display:flex; align-items:center; justify-content:center; gap:10px; padding:13px; background:#fff; color:#1f1f1f; border-radius:12px; font-size:15px; font-weight:600; }
-  .gbtn:disabled { opacity:.6; }
-  .gbtn svg { width:20px; height:20px; flex-shrink:0; }
-
-  .divider { display:flex; align-items:center; gap:10px; color:#5c6b7a; font-size:12px; margin:4px 0; }
-  .divider::before, .divider::after { content:""; flex:1; height:1px; background:#22303d; }
-
-  .switch { display:flex; background:#17212b; border-radius:10px; padding:4px; }
-  .switch button { flex:1; padding:9px; border-radius:8px; background:transparent; color:#7d8e9e; font-size:14px; font-weight:600; transition:.15s; }
-  .switch button.active { background:#2b5278; color:#fff; }
-
-  .auth-form { display:flex; flex-direction:column; gap:10px; }
-  .auth-form input { padding:13px 15px; border-radius:11px; border:1px solid #22303d; background:#17212b; color:#fff; font-size:15px; outline:none; transition:.15s; }
-  .auth-form input:focus { border-color:#5288c1; background:#1a2632; }
-  .auth-form .primary { padding:14px; border-radius:11px; background:#5288c1; color:#fff; font-size:15px; font-weight:600; margin-top:4px; transition:.15s; }
-  .auth-form .primary:active { background:#4478b0; }
-  .auth-form .primary:disabled { opacity:.6; }
-
-  #loginMsg { font-size:13px; line-height:1.5; min-height:18px; text-align:center; max-width:340px; word-wrap:break-word; }
-  #loginMsg.err { color:#e74c3c; }
-  #loginMsg.ok { color:#4caf50; }
-
-  header { background:#17212b; padding:12px 14px; display:flex; align-items:center; gap:10px; flex-shrink:0; border-bottom:1px solid #0e1621; min-height:56px; }
+  /* HEADER */
+  header { background:#17212b; padding:14px 16px; display:flex; align-items:center;
+    gap:10px; border-bottom:1px solid #0e1621; flex-shrink:0; min-height:56px; }
   header h2 { font-size:18px; margin:0; flex:1; font-weight:600; }
-  header .icon-btn { background:transparent; color:#7fa9d1; padding:8px; font-size:20px; line-height:1; border-radius:50%; }
+  header .icon-btn { background:transparent; color:#7fa9d1; padding:8px;
+    font-size:20px; line-height:1; border-radius:50%; }
   header .icon-btn:active { background:#232e3c; }
-  header .back { color:#7fa9d1; font-size:24px; padding:6px 10px 6px 0; }
+  header .back { color:#7fa9d1; font-size:26px; padding:6px 10px 6px 0; line-height:1; }
 
+  /* CONTENT */
   .content { flex:1; overflow-y:auto; }
   .tab { display:none; height:100%; overflow-y:auto; }
   .tab.active { display:block; }
-  .item { padding:12px 16px; display:flex; align-items:center; gap:14px; border-bottom:1px solid #17212b; cursor:pointer; }
+
+  .item { padding:12px 16px; display:flex; align-items:center; gap:14px;
+    border-bottom:1px solid #17212b; cursor:pointer; }
   .item:active { background:#17212b; }
-  .item .avatar { width:52px; height:52px; border-radius:50%; background:#2b5278; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; overflow:hidden; }
+  .item .avatar { width:52px; height:52px; border-radius:50%; background:#2b5278;
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+    flex-shrink:0; overflow:hidden; }
   .item .avatar img { width:100%; height:100%; object-fit:cover; }
   .item .info { flex:1; min-width:0; }
-  .item .name { font-weight:600; font-size:15px; margin-bottom:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:flex; align-items:center; gap:6px; }
-  .item .sub { font-size:13px; color:#7d8e9e; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .item .meta { font-size:12px; color:#7d8e9e; text-align:right; align-self:flex-start; padding-top:2px; flex-shrink:0; }
-  .online-dot { width:8px; height:8px; border-radius:50%; background:#4caf50; flex-shrink:0; display:inline-block; }
-  .empty { padding:60px 24px; text-align:center; color:#7d8e9e; font-size:14px; }
+  .item .name { font-weight:600; font-size:15px; margin-bottom:3px; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+  .item .sub { font-size:13px; color:#7d8e9e; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; }
+  .item .meta { font-size:12px; color:#7d8e9e; align-self:flex-start; flex-shrink:0; }
+  .dot { width:8px; height:8px; border-radius:50%; background:#4caf50; display:inline-block; }
+
+  .empty { padding:60px 24px; text-align:center; color:#7d8e9e; font-size:14px; line-height:1.6; }
   .empty .big { font-size:48px; margin-bottom:12px; opacity:.5; }
-  .bottom-nav { display:flex; background:#17212b; border-top:1px solid #0e1621; flex-shrink:0; padding:6px 0 env(safe-area-inset-bottom, 6px) 0; }
-  .bottom-nav button { flex:1; background:transparent; color:#7d8e9e; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px; font-size:11px; font-weight:500; }
+
+  /* BOTTOM NAV */
+  .bottom-nav { display:flex; background:#17212b; border-top:1px solid #0e1621;
+    flex-shrink:0; padding:6px 0 env(safe-area-inset-bottom, 6px) 0; }
+  .bottom-nav button { flex:1; background:transparent; color:#7d8e9e;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:8px 4px; font-size:11px; font-weight:500; }
   .bottom-nav button .ico { font-size:22px; line-height:1; }
   .bottom-nav button.active { color:#5288c1; }
 
-  #messages { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:6px; }
-  .msg { max-width:80%; padding:8px 12px; border-radius:14px; background:#182533; word-wrap:break-word; font-size:15px; line-height:1.35; }
+  /* CHAT */
+  #messages { flex:1; overflow-y:auto; padding:12px; display:flex;
+    flex-direction:column; gap:6px; }
+  .msg { max-width:80%; padding:9px 13px; border-radius:14px; background:#182533;
+    word-wrap:break-word; font-size:15px; line-height:1.35; }
   .msg.mine { align-self:flex-end; background:#2b5278; }
   .msg .author { font-size:12px; color:#5288c1; margin-bottom:3px; font-weight:600; }
   .msg .time { font-size:11px; color:#7d8e9e; text-align:right; margin-top:2px; }
   .msg.mine .time { color:#a9c8e2; }
-  form.composer { display:flex; gap:8px; padding:10px 12px; background:#17212b; border-top:1px solid #0e1621; flex-shrink:0; padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px)); }
-  form.composer input { flex:1; padding:12px 16px; border-radius:22px; background:#232e3c; color:#fff; font-size:15px; outline:none; border:0; }
-  form.composer button { width:46px; height:46px; border-radius:50%; background:#5288c1; color:#fff; font-size:18px; flex-shrink:0; }
+  form.composer { display:flex; gap:8px; padding:10px 12px; background:#17212b;
+    border-top:1px solid #0e1621; flex-shrink:0;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px)); }
+  form.composer input { flex:1; padding:13px 16px; border-radius:22px;
+    background:#232e3c; color:#fff; font-size:15px; outline:none; border:0; }
+  form.composer button { width:46px; height:46px; border-radius:50%;
+    background:#5288c1; color:#fff; font-size:18px; flex-shrink:0; }
 
+  /* SETTINGS */
   .settings-block { background:#17212b; margin:10px 0; }
-  .settings-block .profile { padding:24px 16px; display:flex; flex-direction:column; align-items:center; gap:10px; }
-  .settings-block .profile .avatar { width:88px; height:88px; border-radius:50%; background:#2b5278; display:flex; align-items:center; justify-content:center; font-size:36px; overflow:hidden; }
-  .settings-block .profile .avatar img { width:100%; height:100%; object-fit:cover; }
-  .settings-block .profile .pname { font-size:20px; font-weight:600; }
-  .settings-block .profile .pemail { font-size:13px; color:#7d8e9e; }
-  .settings-row { padding:16px; display:flex; align-items:center; gap:14px; border-top:1px solid #0e1621; cursor:pointer; }
-  .settings-row:active { background:#1e2a38; }
-  .settings-row .ico { font-size:20px; width:24px; text-align:center; color:#7fa9d1; }
-  .settings-row .label { flex:1; font-size:15px; }
-  .settings-row .val { color:#7d8e9e; font-size:14px; max-width:50%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .settings-row.danger .ico, .settings-row.danger .label { color:#e74c3c; }
+  .profile { padding:24px 16px; display:flex; flex-direction:column;
+    align-items:center; gap:10px; }
+  .profile .avatar { width:88px; height:88px; border-radius:50%; background:#2b5278;
+    display:flex; align-items:center; justify-content:center; font-size:36px; overflow:hidden; }
+  .profile .avatar img { width:100%; height:100%; object-fit:cover; }
+  .profile .pname { font-size:20px; font-weight:600; }
+  .profile .pemail { font-size:13px; color:#7d8e9e; }
+  .srow { padding:16px; display:flex; align-items:center; gap:14px;
+    border-top:1px solid #0e1621; cursor:pointer; }
+  .srow:active { background:#1e2a38; }
+  .srow .ico { font-size:20px; width:24px; text-align:center; color:#7fa9d1; }
+  .srow .label { flex:1; font-size:15px; }
+  .srow.danger .ico, .srow.danger .label { color:#e74c3c; }
 
-  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100; align-items:center; justify-content:center; padding:20px; }
+  /* MODAL */
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75);
+    z-index:100; align-items:center; justify-content:center; padding:20px; }
   .modal.active { display:flex; }
-  .modal-box { background:#17212b; padding:20px; border-radius:16px; width:100%; max-width:360px; max-height:80vh; overflow-y:auto; }
+  .modal-box { background:#17212b; padding:20px; border-radius:16px;
+    width:100%; max-width:360px; max-height:80vh; overflow-y:auto; }
   .modal-box h3 { margin:0 0 14px; font-size:18px; }
-  .modal-box input { width:100%; padding:12px; border-radius:10px; border:1px solid #2b3a4a; background:#232e3c; color:#fff; font-size:15px; outline:none; margin-bottom:10px; }
-  .modal-box .m-actions { display:flex; gap:8px; margin-top:8px; }
-  .modal-box .m-actions button { flex:1; padding:12px; border-radius:10px; font-size:15px; font-weight:600; }
+  .modal-box input { width:100%; padding:12px; border-radius:10px;
+    border:1px solid #2b3a4a; background:#232e3c; color:#fff;
+    font-size:15px; outline:none; margin-bottom:10px; }
+  .m-actions { display:flex; gap:8px; margin-top:8px; }
+  .m-actions button { flex:1; padding:12px; border-radius:10px;
+    font-size:15px; font-weight:600; }
   .btn-primary { background:#5288c1; color:#fff; }
   .btn-secondary { background:#232e3c; color:#fff; }
-  .user-pick { padding:10px 12px; display:flex; align-items:center; gap:12px; border-radius:8px; cursor:pointer; }
+  .user-pick { padding:10px 12px; display:flex; align-items:center;
+    gap:12px; border-radius:8px; cursor:pointer; }
   .user-pick.selected { background:#2b5278; }
-  .user-pick .avatar { width:40px; height:40px; border-radius:50%; background:#2b5278; display:flex; align-items:center; justify-content:center; font-size:16px; overflow:hidden; flex-shrink:0; }
+  .user-pick .avatar { width:40px; height:40px; border-radius:50%; background:#2b5278;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+    overflow:hidden; flex-shrink:0; }
   .user-pick .avatar img { width:100%; height:100%; object-fit:cover; }
   .user-pick .nm { flex:1; font-size:14px; }
-  .user-pick .chk { width:22px; height:22px; border-radius:50%; border:2px solid #5288c1; display:flex; align-items:center; justify-content:center; font-size:14px; color:transparent; }
+  .user-pick .chk { width:22px; height:22px; border-radius:50%;
+    border:2px solid #5288c1; display:flex; align-items:center;
+    justify-content:center; font-size:14px; color:transparent; }
   .user-pick.selected .chk { background:#5288c1; color:#fff; }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login" class="screen active">
   <div class="logo">💬</div>
   <h1>MyChat</h1>
   <div class="sub">Общайся со всем миром</div>
-
-  <div class="box">
-    <button class="gbtn" id="googleBtn">
-      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 2.9-2.2 5.4-4.6 7.1l7.2 5.6C43.4 37.5 46.5 31.5 46.5 24.5z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.4-.7-2.9-.7-4.6s.3-3.2.7-4.6l-7.8-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.2-2 15-5.5l-7.2-5.6c-2 1.4-4.6 2.2-7.8 2.2-6.3 0-11.7-3.7-13.6-9.8l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
-      Войти через Google
-    </button>
-
-    <div class="divider">или</div>
-
-    <div class="switch">
-      <button id="tabLogin" class="active">Вход</button>
-      <button id="tabReg">Регистрация</button>
-    </div>
-
-    <form class="auth-form" id="authForm">
-      <input id="authName" type="text" placeholder="Твоё имя" maxlength="30" style="display:none;">
-      <input id="authEmail" type="email" placeholder="Email" autocomplete="email" required>
-      <input id="authPass" type="password" placeholder="Пароль (мин. 6 символов)" autocomplete="current-password" required>
-      <button type="submit" class="primary" id="authSubmit">Войти</button>
-    </form>
-
-    <div id="loginMsg"></div>
-  </div>
+  <button class="gbtn" id="googleBtn">
+    <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 2.9-2.2 5.4-4.6 7.1l7.2 5.6C43.4 37.5 46.5 31.5 46.5 24.5z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.4-.7-2.9-.7-4.6s.3-3.2.7-4.6l-7.8-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.2-2 15-5.5l-7.2-5.6c-2 1.4-4.6 2.2-7.8 2.2-6.3 0-11.7-3.7-13.6-9.8l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+    Войти через Google
+  </button>
+  <div id="loginMsg"></div>
 </div>
 
+<!-- MAIN -->
 <div id="mainScreen" class="screen">
   <header>
     <h2 id="headerTitle">MyChat</h2>
@@ -155,15 +162,7 @@
         </div>
       </div>
       <div class="settings-block">
-        <div class="settings-row" id="rowEditName">
-          <div class="ico">✏️</div><div class="label">Изменить имя</div><div class="val" id="curName">…</div>
-        </div>
-        <div class="settings-row">
-          <div class="ico">ℹ️</div><div class="label">О приложении</div><div class="val">v2.3</div>
-        </div>
-      </div>
-      <div class="settings-block">
-        <div class="settings-row danger" id="rowLogout">
+        <div class="srow danger" id="rowLogout">
           <div class="ico">🚪</div><div class="label">Выйти из аккаунта</div>
         </div>
       </div>
@@ -176,9 +175,10 @@
   </nav>
 </div>
 
+<!-- CHAT -->
 <div id="chatScreen" class="screen">
   <header>
-    <button class="back icon-btn" id="backBtn">←</button>
+    <button class="back" id="backBtn">←</button>
     <div id="chatAvatar" style="width:36px;height:36px;border-radius:50%;background:#2b5278;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;"></div>
     <h2 id="chatTitle" style="font-size:16px;">…</h2>
   </header>
@@ -189,6 +189,7 @@
   </form>
 </div>
 
+<!-- NEW CHAT MODAL -->
 <div class="modal" id="newChatModal">
   <div class="modal-box">
     <h3>Новый чат</h3>
@@ -202,58 +203,39 @@
   </div>
 </div>
 
-<div class="modal" id="editNameModal">
-  <div class="modal-box">
-    <h3>Изменить имя</h3>
-    <input id="editNameInput" placeholder="Твоё имя" maxlength="40">
-    <div class="m-actions">
-      <button class="btn-secondary" id="cancelEditName">Отмена</button>
-      <button class="btn-primary" id="saveEditName">Сохранить</button>
-    </div>
-  </div>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile,
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
   browserLocalPersistence, setPersistence }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, push, set, get, update, onValue, onChildAdded, onDisconnect, query, limitToLast }
+import { getDatabase, ref, push, set, get, update, onValue, onChildAdded,
+  onDisconnect, query, limitToLast }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const firebaseConfig = {
+const cfg = {
   apiKey: "AIzaSyA7W1Aa0-6ArSM3rJ1B-RsfXzkKnJlFbvg",
   authDomain: "mychat-9f629.firebaseapp.com",
   databaseURL: "https://mychat-9f629-default-rtdb.europe-west1.firebasedatabase.app/",
   projectId: "mychat-9f629",
   storageBucket: "mychat-9f629.firebasestorage.app",
   messagingSenderId: "175226507843",
-  appId: "1:175226507843:web:0be69688dbef0d4bd9baf6",
-  measurementId: "G-4J4S8LSRSC"
+  appId: "1:175226507843:web:0be69688dbef0d4bd9baf6"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(cfg);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
-
 setPersistence(auth, browserLocalPersistence).catch(e => console.error(e));
 
 const $ = id => document.getElementById(id);
-let me = null, myProfile = null, allUsers = {}, myChats = [], currentChat = null, msgUnsub = null, pickerSelected = {};
-let mode = 'login';
+let me = null, myProfile = null, allUsers = {}, myChats = [],
+    currentChat = null, msgUnsub = null, pickerSelected = {};
 
-function setMsg(text, type = '') {
-  const el = $('loginMsg');
-  el.textContent = text;
-  el.className = type;
-}
-
-// === GOOGLE ===
+// === GOOGLE LOGIN ===
 $('googleBtn').onclick = async () => {
-  setMsg('');
+  $('loginMsg').textContent = '';
   $('googleBtn').disabled = true;
   const orig = $('googleBtn').innerHTML;
   $('googleBtn').innerHTML = 'Подключение…';
@@ -263,71 +245,7 @@ $('googleBtn').onclick = async () => {
     console.error(e);
     $('googleBtn').disabled = false;
     $('googleBtn').innerHTML = orig;
-    if (e.code === 'auth/popup-blocked') {
-      setMsg('Chrome блокирует окна. Разреши всплывающие окна для сайта.', 'err');
-    } else if (e.code === 'auth/network-request-failed') {
-      setMsg('Нет связи с Firebase. Попробуй переключить VPN.', 'err');
-    } else if (e.code === 'auth/unauthorized-domain') {
-      setMsg('Домен не разрешён. Добавь mychat-pied-ten.vercel.app в Firebase → Authentication → Settings → Authorized domains', 'err');
-    } else if (e.code === 'auth/operation-not-allowed') {
-      setMsg('Google-вход отключён в Firebase → Authentication → Sign-in method', 'err');
-    } else if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
-      setMsg('Окно закрыто. Нажми ещё раз.', 'err');
-    } else {
-      setMsg('Ошибка: ' + e.code, 'err');
-    }
-  }
-};
-
-// === EMAIL / PASSWORD ===
-$('tabLogin').onclick = () => switchMode('login');
-$('tabReg').onclick = () => switchMode('reg');
-
-function switchMode(m) {
-  mode = m;
-  setMsg('');
-  $('tabLogin').classList.toggle('active', m === 'login');
-  $('tabReg').classList.toggle('active', m === 'reg');
-  $('authName').style.display = m === 'reg' ? 'block' : 'none';
-  $('authSubmit').textContent = m === 'reg' ? 'Создать аккаунт' : 'Войти';
-  $('authPass').autocomplete = m === 'reg' ? 'new-password' : 'current-password';
-}
-
-$('authForm').onsubmit = async e => {
-  e.preventDefault();
-  setMsg('');
-  const email = $('authEmail').value.trim();
-  const pass = $('authPass').value;
-  const name = $('authName').value.trim();
-  if (!email || !pass) { setMsg('Заполни email и пароль', 'err'); return; }
-  if (pass.length < 6) { setMsg('Пароль минимум 6 символов', 'err'); return; }
-  if (mode === 'reg' && !name) { setMsg('Введи имя', 'err'); return; }
-
-  $('authSubmit').disabled = true;
-  $('authSubmit').textContent = 'Подключение…';
-
-  try {
-    if (mode === 'reg') {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await updateProfile(cred.user, { displayName: name });
-    } else {
-      await signInWithEmailAndPassword(auth, email, pass);
-    }
-  } catch (e) {
-    console.error(e);
-    $('authSubmit').disabled = false;
-    $('authSubmit').textContent = mode === 'reg' ? 'Создать аккаунт' : 'Войти';
-    const map = {
-      'auth/email-already-in-use': 'Этот email уже занят',
-      'auth/invalid-email': 'Неверный email',
-      'auth/weak-password': 'Слабый пароль (мин. 6)',
-      'auth/user-not-found': 'Пользователь не найден. Зарегистрируйся.',
-      'auth/wrong-password': 'Неверный пароль',
-      'auth/invalid-credential': 'Неверный email или пароль',
-      'auth/too-many-requests': 'Слишком много попыток. Подожди.',
-      'auth/network-request-failed': 'Нет связи. Проверь VPN.'
-    };
-    setMsg(map[e.code] || ('Ошибка: ' + e.code), 'err');
+    $('loginMsg').textContent = 'Ошибка: ' + (e.code || e.message);
   }
 };
 
@@ -336,33 +254,35 @@ onAuthStateChanged(auth, async user => {
   if (!user) {
     me = null; myProfile = null;
     $('login').classList.add('active');
-    document.querySelectorAll('.screen').forEach(s => { if (s.id !== 'login') s.classList.remove('active'); });
-    $('authSubmit').disabled = false;
-    $('authSubmit').textContent = mode === 'reg' ? 'Создать аккаунт' : 'Войти';
+    document.querySelectorAll('.screen').forEach(s => {
+      if (s.id !== 'login') s.classList.remove('active');
+    });
     $('googleBtn').disabled = false;
     return;
   }
   me = user;
-  setMsg('');
+  $('loginMsg').textContent = '';
+
   try {
     const userRef = ref(db, `users/${user.uid}`);
     const snap = await get(userRef);
-    const existing = snap.val() || {};
+    const ex = snap.val() || {};
     myProfile = {
-      name: existing.name || user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
-      photo: existing.photo || user.photoURL || '',
+      name: ex.name || user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
+      photo: ex.photo || user.photoURL || '',
       email: user.email || '',
       lastSeen: Date.now()
     };
     await set(userRef, myProfile);
-    const onlineRef = ref(db, `users/${user.uid}/online`);
-    await set(onlineRef, true);
-    onDisconnect(onlineRef).set(false);
+    const oRef = ref(db, `users/${user.uid}/online`);
+    await set(oRef, true);
+    onDisconnect(oRef).set(false);
   } catch (e) {
     console.error('Save error:', e);
-    setMsg('Ошибка сохранения: ' + e.message, 'err');
+    $('loginMsg').textContent = 'Ошибка сохранения: ' + e.message;
     return;
   }
+
   $('login').classList.remove('active');
   $('mainScreen').classList.add('active');
   renderSettings();
@@ -370,6 +290,7 @@ onAuthStateChanged(auth, async user => {
   watchChats();
 });
 
+// === USERS ===
 function watchUsers() {
   onValue(ref(db, 'users'), snap => {
     allUsers = snap.val() || {};
@@ -380,68 +301,97 @@ function watchUsers() {
 
 function renderPeople() {
   const list = $('peopleList');
-  const arr = Object.entries(allUsers).filter(([uid]) => uid !== me.uid).map(([uid, u]) => ({ uid, ...u }));
-  if (arr.length === 0) { list.innerHTML = `<div class="empty"><div class="big">👥</div>Пока никого нет.<br>Скинь друзьям ссылку!</div>`; return; }
+  const arr = Object.entries(allUsers).filter(([uid]) => uid !== me.uid)
+    .map(([uid, u]) => ({ uid, ...u }));
+  if (!arr.length) {
+    list.innerHTML = `<div class="empty"><div class="big">👥</div>Пока никого нет.<br>Скинь друзьям ссылку на сайт!</div>`;
+    return;
+  }
   list.innerHTML = '';
   arr.forEach(u => {
     const div = document.createElement('div');
     div.className = 'item';
-    div.innerHTML = `<div class="avatar">${avatarHTML(u)}</div><div class="info"><div class="name">${esc(u.name)} ${u.online ? '<span class="online-dot"></span>' : ''}</div><div class="sub">${esc(u.email || '')}</div></div>`;
-    div.onclick = () => openPrivateChat(u.uid);
+    div.innerHTML = `<div class="avatar">${avHTML(u)}</div>
+      <div class="info">
+        <div class="name">${esc(u.name)} ${u.online ? '<span class="dot"></span>' : ''}</div>
+        <div class="sub">${esc(u.email || '')}</div>
+      </div>`;
+    div.onclick = () => openPrivate(u.uid);
     list.appendChild(div);
   });
 }
 
+// === CHATS ===
 function watchChats() {
   onValue(ref(db, 'chats'), snap => {
     const all = snap.val() || {};
-    myChats = Object.entries(all).filter(([id, c]) => c.members && c.members[me.uid]).map(([id, c]) => ({ id, ...c })).sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
+    myChats = Object.entries(all)
+      .filter(([id, c]) => c.members && c.members[me.uid])
+      .map(([id, c]) => ({ id, ...c }))
+      .sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
     renderChats();
   });
 }
 
 function renderChats() {
   const list = $('chatsList');
-  if (myChats.length === 0) { list.innerHTML = `<div class="empty"><div class="big">💬</div>Пока нет чатов.<br>Нажми ✏️ сверху.</div>`; return; }
+  if (!myChats.length) {
+    list.innerHTML = `<div class="empty"><div class="big">💬</div>Пока нет чатов.<br>Нажми ✏️ сверху или открой «Люди».</div>`;
+    return;
+  }
   list.innerHTML = '';
   myChats.forEach(c => {
     const div = document.createElement('div');
     div.className = 'item';
-    const isPrivate = c.type === 'private';
-    const otherUid = isPrivate ? Object.keys(c.members).find(u => u !== me.uid) : null;
-    const other = otherUid ? allUsers[otherUid] : null;
-    const title = isPrivate ? (other ? other.name : 'Пользователь') : (c.name || 'Группа');
-    const sub = c.lastMessage ? `${c.lastUid === me.uid ? 'Вы: ' : (c.lastName ? c.lastName + ': ' : '')}${esc(c.lastMessage)}` : 'Нет сообщений';
+    const isPriv = c.type === 'private';
+    const oUid = isPriv ? Object.keys(c.members).find(u => u !== me.uid) : null;
+    const other = oUid ? allUsers[oUid] : null;
+    const title = isPriv ? (other ? other.name : 'Пользователь') : (c.name || 'Группа');
+    const sub = c.lastMessage
+      ? `${c.lastUid === me.uid ? 'Вы: ' : (c.lastName ? c.lastName + ': ' : '')}${esc(c.lastMessage)}`
+      : 'Нет сообщений';
     const t = c.lastTime ? timeShort(c.lastTime) : '';
-    const av = isPrivate && other ? (other.photo ? `<img src="${esc(other.photo)}">` : esc((other.name || '?')[0].toUpperCase())) : (isPrivate ? '?' : '👥');
-    div.innerHTML = `<div class="avatar">${av}</div><div class="info"><div class="name">${esc(title)}</div><div class="sub">${sub}</div></div><div class="meta">${t}</div>`;
+    const av = isPriv && other
+      ? (other.photo ? `<img src="${esc(other.photo)}">` : esc((other.name || '?')[0].toUpperCase()))
+      : (isPriv ? '?' : '👥');
+    div.innerHTML = `<div class="avatar">${av}</div>
+      <div class="info"><div class="name">${esc(title)}</div><div class="sub">${sub}</div></div>
+      <div class="meta">${t}</div>`;
     div.onclick = () => openChat(c.id, title, other, c);
     list.appendChild(div);
   });
 }
 
-async function openPrivateChat(otherUid) {
-  const chatId = [me.uid, otherUid].sort().join('_');
-  const chatRef = ref(db, `chats/${chatId}`);
-  const snap = await get(chatRef);
+async function openPrivate(uid) {
+  const chatId = [me.uid, uid].sort().join('_');
+  const r = ref(db, `chats/${chatId}`);
+  const snap = await get(r);
   if (!snap.exists()) {
-    await set(chatRef, { type: 'private', members: { [me.uid]: true, [otherUid]: true }, createdAt: Date.now(), lastTime: Date.now() });
+    await set(r, { type: 'private',
+      members: { [me.uid]: true, [uid]: true },
+      createdAt: Date.now(), lastTime: Date.now() });
   }
-  const other = allUsers[otherUid];
-  openChat(chatId, other ? other.name : 'Чат', other, { type: 'private', members: { [me.uid]: true, [otherUid]: true } });
+  const other = allUsers[uid];
+  openChat(chatId, other ? other.name : 'Чат', other,
+    { type: 'private', members: { [me.uid]: true, [uid]: true } });
   switchTab('chatsTab');
 }
 
-function openChat(chatId, title, otherUser, chatData) {
-  currentChat = { id: chatId, title, otherUser, data: chatData };
+function openChat(chatId, title, other, data) {
+  currentChat = { id: chatId, title, other, data };
   $('chatTitle').textContent = title;
   const av = $('chatAvatar');
-  if (otherUser) { av.innerHTML = otherUser.photo ? `<img src="${esc(otherUser.photo)}" style="width:100%;height:100%;object-fit:cover;">` : esc((otherUser.name || '?')[0].toUpperCase()); }
-  else av.innerHTML = '👥';
+  if (other) {
+    av.innerHTML = other.photo
+      ? `<img src="${esc(other.photo)}" style="width:100%;height:100%;object-fit:cover;">`
+      : esc((other.name || '?')[0].toUpperCase());
+  } else av.innerHTML = '👥';
+
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $('chatScreen').classList.add('active');
-  const msgsEl = $('messages');
-  msgsEl.innerHTML = '';
+
+  const box = $('messages');
+  box.innerHTML = '';
   if (msgUnsub) msgUnsub();
   const q = query(ref(db, `messages/${chatId}`), limitToLast(200));
   msgUnsub = onChildAdded(q, snap => {
@@ -449,10 +399,10 @@ function openChat(chatId, title, otherUser, chatData) {
     const div = document.createElement('div');
     div.className = 'msg' + (m.uid === me.uid ? ' mine' : '');
     const t = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
-    const showAuthor = !currentChat.data || currentChat.data.type !== 'private';
-    div.innerHTML = `${showAuthor && m.uid !== me.uid ? `<div class="author">${esc(m.name)}</div>` : ''}${esc(m.text)}<div class="time">${t}</div>`;
-    msgsEl.appendChild(div);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
+    const show = !currentChat.data || currentChat.data.type !== 'private';
+    div.innerHTML = `${show && m.uid !== me.uid ? `<div class="author">${esc(m.name)}</div>` : ''}${esc(m.text)}<div class="time">${t}</div>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
   });
 }
 
@@ -468,75 +418,107 @@ $('form').onsubmit = async e => {
   const text = $('input').value.trim();
   if (!text || !currentChat) return;
   $('input').value = '';
-  await push(ref(db, `messages/${currentChat.id}`), { uid: me.uid, name: myProfile.name, text, time: Date.now() });
-  await update(ref(db, `chats/${currentChat.id}`), { lastMessage: text.slice(0, 100), lastName: myProfile.name, lastUid: me.uid, lastTime: Date.now() });
+  await push(ref(db, `messages/${currentChat.id}`),
+    { uid: me.uid, name: myProfile.name, text, time: Date.now() });
+  await update(ref(db, `chats/${currentChat.id}`),
+    { lastMessage: text.slice(0, 100), lastName: myProfile.name,
+      lastUid: me.uid, lastTime: Date.now() });
 };
 
-document.querySelectorAll('.bottom-nav button').forEach(btn => { btn.onclick = () => switchTab(btn.dataset.tab); });
-
-function switchTab(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === tabId));
-  document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+// === TABS ===
+document.querySelectorAll('.bottom-nav button').forEach(b => {
+  b.onclick = () => switchTab(b.dataset.tab);
+});
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === id));
+  document.querySelectorAll('.bottom-nav button').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === id));
   const titles = { chatsTab: 'MyChat', peopleTab: 'Все люди', settingsTab: 'Настройки' };
-  $('headerTitle').textContent = titles[tabId] || 'MyChat';
+  $('headerTitle').textContent = titles[id] || 'MyChat';
 }
 
-$('newChatBtn').onclick = () => { pickerSelected = {}; $('newRoomName').value = ''; renderUserPicker(); $('newChatModal').classList.add('active'); };
+// === NEW CHAT ===
+$('newChatBtn').onclick = () => {
+  pickerSelected = {};
+  $('newRoomName').value = '';
+  renderPicker();
+  $('newChatModal').classList.add('active');
+};
 $('cancelNewChat').onclick = () => $('newChatModal').classList.remove('active');
-$('newChatModal').onclick = e => { if (e.target.id === 'newChatModal') $('newChatModal').classList.remove('active'); };
+$('newChatModal').onclick = e => {
+  if (e.target.id === 'newChatModal') $('newChatModal').classList.remove('active');
+};
 
-function renderUserPicker() {
+function renderPicker() {
   const list = $('userPickerList');
   const arr = Object.entries(allUsers).filter(([uid]) => uid !== me.uid);
-  if (arr.length === 0) { list.innerHTML = '<div style="padding:14px;color:#7d8e9e;font-size:14px;">Пока никого нет.</div>'; return; }
+  if (!arr.length) {
+    list.innerHTML = '<div style="padding:14px;color:#7d8e9e;font-size:14px;">Пока никого нет.</div>';
+    return;
+  }
   list.innerHTML = '';
   arr.forEach(([uid, u]) => {
     const div = document.createElement('div');
     div.className = 'user-pick' + (pickerSelected[uid] ? ' selected' : '');
-    div.innerHTML = `<div class="avatar">${u.photo ? `<img src="${esc(u.photo)}">` : esc((u.name || '?')[0].toUpperCase())}</div><div class="nm">${esc(u.name)}</div><div class="chk">✓</div>`;
-    div.onclick = () => { pickerSelected[uid] = !pickerSelected[uid]; renderUserPicker(); };
+    div.innerHTML = `<div class="avatar">${u.photo ? `<img src="${esc(u.photo)}">` : esc((u.name || '?')[0].toUpperCase())}</div>
+      <div class="nm">${esc(u.name)}</div>
+      <div class="chk">✓</div>`;
+    div.onclick = () => {
+      pickerSelected[uid] = !pickerSelected[uid];
+      renderPicker();
+    };
     list.appendChild(div);
   });
 }
 
 $('createChat').onclick = async () => {
-  const selected = Object.keys(pickerSelected).filter(u => pickerSelected[u]);
-  const groupName = $('newRoomName').value.trim();
-  if (selected.length === 0) { alert('Выбери хотя бы одного'); return; }
-  if (selected.length === 1 && !groupName) { $('newChatModal').classList.remove('active'); openPrivateChat(selected[0]); return; }
+  const sel = Object.keys(pickerSelected).filter(u => pickerSelected[u]);
+  const name = $('newRoomName').value.trim();
+  if (!sel.length) { alert('Выбери хотя бы одного'); return; }
+  if (sel.length === 1 && !name) {
+    $('newChatModal').classList.remove('active');
+    openPrivate(sel[0]);
+    return;
+  }
   const members = { [me.uid]: true };
-  selected.forEach(uid => members[uid] = true);
-  const chatRef = push(ref(db, 'chats'));
-  await set(chatRef, { type: 'group', name: groupName || 'Группа', members, createdBy: me.uid, createdAt: Date.now(), lastTime: Date.now() });
+  sel.forEach(u => members[u] = true);
+  const r = push(ref(db, 'chats'));
+  await set(r, { type: 'group', name: name || 'Группа', members,
+    createdBy: me.uid, createdAt: Date.now(), lastTime: Date.now() });
   $('newChatModal').classList.remove('active');
-  openChat(chatRef.key, groupName || 'Группа', null, { type: 'group' });
+  openChat(r.key, name || 'Группа', null, { type: 'group' });
   switchTab('chatsTab');
 };
 
+// === SETTINGS ===
 function renderSettings() {
   $('setName').textContent = myProfile.name;
   $('setEmail').textContent = myProfile.email;
-  $('curName').textContent = myProfile.name;
   const av = $('setAvatar');
-  av.innerHTML = myProfile.photo ? `<img src="${esc(myProfile.photo)}" style="width:100%;height:100%;object-fit:cover;">` : esc((myProfile.name || '?')[0].toUpperCase());
+  av.innerHTML = myProfile.photo
+    ? `<img src="${esc(myProfile.photo)}" style="width:100%;height:100%;object-fit:cover;">`
+    : esc((myProfile.name || '?')[0].toUpperCase());
 }
-
-$('rowEditName').onclick = () => { $('editNameInput').value = myProfile.name; $('editNameModal').classList.add('active'); setTimeout(() => $('editNameInput').focus(), 100); };
-$('cancelEditName').onclick = () => $('editNameModal').classList.remove('active');
-$('editNameModal').onclick = e => { if (e.target.id === 'editNameModal') $('editNameModal').classList.remove('active'); };
-$('saveEditName').onclick = async () => {
-  const newName = $('editNameInput').value.trim();
-  if (!newName) return;
-  myProfile.name = newName;
-  await update(ref(db, `users/${me.uid}`), { name: newName });
-  renderSettings();
-  $('editNameModal').classList.remove('active');
+$('rowLogout').onclick = () => {
+  if (confirm('Выйти из аккаунта?')) signOut(auth);
 };
-$('rowLogout').onclick = () => { if (confirm('Выйти из аккаунта?')) signOut(auth); };
 
-function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function avatarHTML(u) { if (!u) return '?'; if (u.photo) return `<img src="${esc(u.photo)}">`; return esc((u.name || '?')[0].toUpperCase()); }
-function timeShort(ts) { const d = new Date(ts); const now = new Date(); if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); return d.toLocaleDateString([], {day:'2-digit', month:'2-digit'}); }
+// === HELPERS ===
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function avHTML(u) {
+  if (!u) return '?';
+  if (u.photo) return `<img src="${esc(u.photo)}">`;
+  return esc((u.name || '?')[0].toUpperCase());
+}
+function timeShort(ts) {
+  const d = new Date(ts), n = new Date();
+  if (d.toDateString() === n.toDateString())
+    return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString([], {day:'2-digit',month:'2-digit'});
+}
 </script>
 </body>
 </html>

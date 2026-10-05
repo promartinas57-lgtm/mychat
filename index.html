@@ -22,6 +22,7 @@
   #login h1 { margin:0; font-size:28px; }
   #login p { opacity:.6; margin:0; max-width:280px; }
   #login button { padding:14px 28px; border-radius:24px; border:0; background:#5288c1; color:#fff; font-size:15px; font-weight:600; }
+  #login .err { color:#e74c3c; font-size:13px; margin-top:10px; max-width:300px; }
   .content { flex:1; overflow-y:auto; }
   .tab { display:none; height:100%; overflow-y:auto; }
   .tab.active { display:block; }
@@ -86,6 +87,7 @@
   <h1>MyChat</h1>
   <p>Свой мессенджер. Войди через Google, чтобы начать общаться со всем миром.</p>
   <button id="googleBtn">Войти через Google</button>
+  <div class="err" id="loginErr"></div>
 </div>
 
 <div id="mainScreen" class="screen">
@@ -165,7 +167,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, push, set, get, update, onValue, onChildAdded, onDisconnect, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -183,19 +185,50 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
 
 const $ = id => document.getElementById(id);
 let me = null, myProfile = null, allUsers = {}, myChats = [], currentChat = null, msgUnsub = null, pickerSelected = {};
 
-$('googleBtn').onclick = () => {
+function showError(msg) {
+  const e = $('loginErr');
+  if (e) e.textContent = msg;
+  console.error(msg);
+}
+
+$('googleBtn').onclick = async () => {
+  $('loginErr').textContent = '';
   $('googleBtn').textContent = 'Загрузка…';
-  signInWithRedirect(auth, provider).catch(e => {
-    alert('Ошибка входа: ' + e.message);
-    $('googleBtn').textContent = 'Войти через Google';
-  });
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    console.error('Popup error:', e.code, e.message);
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+      try {
+        await signInWithRedirect(auth, provider);
+      } catch (e2) {
+        showError('Ошибка редиректа: ' + e2.code + ' — ' + e2.message);
+        $('googleBtn').textContent = 'Войти через Google';
+      }
+    } else if (e.code === 'auth/unauthorized-domain') {
+      showError('Домен не разрешён в Firebase → Authentication → Settings → Authorized domains. Добавь: mychat-pied-ten.vercel.app');
+      $('googleBtn').textContent = 'Войти через Google';
+    } else if (e.code === 'auth/operation-not-allowed') {
+      showError('Вход через Google отключён. Firebase → Authentication → Sign-in method → Google → Enable.');
+      $('googleBtn').textContent = 'Войти через Google';
+    } else {
+      showError('Ошибка: ' + e.code + ' — ' + e.message);
+      $('googleBtn').textContent = 'Войти через Google';
+    }
+  }
 };
 
-getRedirectResult(auth).catch(e => console.error('Redirect error', e));
+getRedirectResult(auth).then(r => {
+  if (r && r.user) console.log('Вход через редирект:', r.user.email);
+}).catch(e => {
+  console.error('Redirect result error:', e.code, e.message);
+  if (e.code !== 'auth/no-auth-event') showError('Ошибка: ' + e.code + ' — ' + e.message);
+});
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -206,6 +239,7 @@ onAuthStateChanged(auth, async user => {
     return;
   }
   me = user;
+  $('loginErr').textContent = '';
   try {
     const userRef = ref(db, `users/${user.uid}`);
     const snap = await get(userRef);
@@ -221,8 +255,8 @@ onAuthStateChanged(auth, async user => {
     await set(onlineRef, true);
     onDisconnect(onlineRef).set(false);
   } catch (e) {
-    console.error('Save user error', e);
-    alert('Ошибка: ' + e.message + '\n\nПроверь правила Firebase → Realtime Database → Rules');
+    console.error('Save user error:', e);
+    showError('Не сохранить профиль: ' + e.message + '. Проверь Rules в Firebase.');
     return;
   }
   $('login').classList.remove('active');

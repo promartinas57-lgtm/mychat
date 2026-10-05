@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MyChat</title>
+<meta name="theme-color" content="#111">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin:0; height:100%; background:#111; color:#eee; font-family:system-ui,-apple-system,sans-serif; }
+  #app { display:flex; flex-direction:column; height:100dvh; }
+  header { padding:12px 16px; background:#1a1a1a; border-bottom:1px solid #262626; display:flex; align-items:center; gap:10px; }
+  header img { width:32px; height:32px; border-radius:50%; }
+  header b { flex:1; }
+  header button { background:#333; color:#eee; border:0; padding:8px 12px; border-radius:8px; font-size:13px; }
+  #messages { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
+  .msg { max-width:78%; padding:8px 12px; border-radius:14px; background:#222; word-wrap:break-word; }
+  .msg.mine { align-self:flex-end; background:#2b5278; }
+  .msg small { display:block; opacity:.6; font-size:11px; margin-top:4px; }
+  form { display:flex; gap:8px; padding:10px; background:#1a1a1a; border-top:1px solid #262626; }
+  form input { flex:1; padding:12px; border-radius:22px; border:0; background:#262626; color:#eee; font-size:15px; }
+  form button { padding:0 18px; border-radius:22px; border:0; background:#2b5278; color:#fff; font-size:15px; }
+  #login { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100dvh; gap:20px; padding:24px; text-align:center; }
+  #login button { padding:14px 24px; border-radius:12px; border:0; background:#fff; color:#111; font-size:16px; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div id="login" style="display:none">
+  <h1>MyChat</h1>
+  <p style="opacity:.7">Войди, чтобы начать общаться</p>
+  <button id="googleBtn">Войти через Google</button>
+</div>
+
+<div id="app" style="display:none">
+  <header>
+    <img id="avatar" alt="">
+    <b id="name">…</b>
+    <button id="logout">Выйти</button>
+  </header>
+  <div id="messages"></div>
+  <form id="form">
+    <input id="input" placeholder="Сообщение…" autocomplete="off" maxlength="500">
+    <button>➤</button>
+  </form>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, serverTimestamp, query, limitToLast }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ТВОЙ КОНФИГ
+const firebaseConfig = {
+  apiKey: "AIzaSyA7W1Aa0-6ArSM3rJ1B-RsfXzkKnJlFbvg",
+  authDomain: "mychat-9f629.firebaseapp.com",
+  databaseURL: "https://mychat-9f629-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "mychat-9f629",
+  storageBucket: "mychat-9f629.firebasestorage.app",
+  messagingSenderId: "175226507843",
+  appId: "1:175226507843:web:0be69688dbef0d4bd9baf6",
+  measurementId: "G-4J4S8LSRSC"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+const loginEl = document.getElementById('login');
+const appEl = document.getElementById('app');
+const msgsEl = document.getElementById('messages');
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+
+document.getElementById('googleBtn').onclick = () => signInWithPopup(auth, provider);
+document.getElementById('logout').onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    loginEl.style.display = 'flex';
+    appEl.style.display = 'none';
+    return;
+  }
+  loginEl.style.display = 'none';
+  appEl.style.display = 'flex';
+  document.getElementById('name').textContent = user.displayName || user.email;
+  document.getElementById('avatar').src = user.photoURL || '';
+
+  msgsEl.innerHTML = '';
+  const q = query(ref(db, 'messages'), limitToLast(200));
+  onChildAdded(q, snap => {
+    const m = snap.val();
+    const div = document.createElement('div');
+    div.className = 'msg' + (m.uid === user.uid ? ' mine' : '');
+    const t = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+    div.innerHTML = `<div style="font-size:12px;opacity:.75">${esc(m.name)}</div>${esc(m.text)}<small>${t}</small>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  });
+});
+
+form.onsubmit = async e => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+  const user = auth.currentUser;
+  input.value = '';
+  await push(ref(db, 'messages'), {
+    uid: user.uid,
+    name: user.displayName || user.email,
+    text,
+    time: serverTimestamp()
+  });
+};
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Test2</title>
+<style>body{font-family:monospace;padding:16px;background:#111;color:#eee;font-size:14px;line-height:1.6}
+button{padding:12px 20px;font-size:16px;background:#5288c1;color:#fff;border:0;border-radius:8px;margin:10px 0}
+.ok{color:#4caf50}.err{color:#e74c3c}.info{color:#7fa9d1}</style></head>
+<body>
+<h2>Тест входа Google</h2>
+<button id="btn">Войти через Google</button>
+<div id="out">Нажми кнопку ↑</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const cfg = {
+  apiKey: "AIzaSyA7W1Aa0-6ArSM3rJ1B-RsfXzkKnJlFbvg",
+  authDomain: "mychat-9f629.firebaseapp.com",
+  databaseURL: "https://mychat-9f629-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "mychat-9f629",
+  storageBucket: "mychat-9f629.firebasestorage.app",
+  messagingSenderId: "175226507843",
+  appId: "1:175226507843:web:0be69688dbef0d4bd9baf6"
+};
+
+const out = document.getElementById('out');
+const log = (t, cls='') => { out.innerHTML += '<div class="'+cls+'">'+t+'</div>'; };
+log('Firebase init...', 'info');
+
+let app, auth;
+try {
+  app = initializeApp(cfg);
+  auth = getAuth(app);
+  log('✅ Firebase готов', 'ok');
+} catch (e) {
+  log('❌ Firebase не создан: ' + e.message, 'err');
+}
+
+log('Адрес страницы: ' + location.origin, 'info');
+
+onAuthStateChanged(auth, u => {
+  if (u) log('✅ ВОШЁЛ: ' + u.email, 'ok');
+  else log('Не авторизован', 'info');
+});
+
+document.getElementById('btn').onclick = async () => {
+  log('--- Нажал кнопку ---', 'info');
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    log('Открываю окно Google...', 'info');
+    const r = await signInWithPopup(auth, provider);
+    log('✅ Успех! ' + r.user.email, 'ok');
+  } catch (e) {
+    log('❌ ОШИБКА', 'err');
+    log('code: ' + e.code, 'err');
+    log('message: ' + e.message, 'err');
+  }
+};
+</script>
+</body></html>
